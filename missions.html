@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brian Bors — Missions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #f5f5f5;
+      --muted: #9a9a9a;
+      --accent: #c8a96e;
+      --line: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* NOISE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    /* NAV */
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      padding: 18px 30px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(10,10,10,0.7);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 4px;
+      font-size: 1.1rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      margin-left: 30px;
+      transition: color 0.3s;
+      text-transform: uppercase;
+    }
+
+    nav a:hover, nav a.active { color: var(--text); }
+
+    /* HERO */
+    .page-hero {
+      height: 55vh;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 20px 60px;
+      max-width: 1100px;
+      margin: auto;
+      padding-top: 100px;
+    }
+
+    .page-hero-inner {
+      border-top: 1px solid var(--line);
+      padding-top: 40px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 12vw, 9rem);
+      line-height: 0.85;
+      letter-spacing: 2px;
+    }
+
+    .page-desc {
+      max-width: 340px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.9;
+      letter-spacing: 0.5px;
+    }
+
+    /* MISSION LIST */
+    .missions-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 120px;
+    }
+
+    .mission-item {
+      display: grid;
+      grid-template-columns: 80px 1fr 200px;
+      gap: 40px;
+      align-items: start;
+      padding: 50px 0;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: all 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .mission-item.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .mission-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      color: var(--line);
+      line-height: 1;
+    }
+
+    .mission-body h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      margin-bottom: 14px;
+      line-height: 1.1;
+    }
+
+    .mission-body p {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.9;
+      max-width: 500px;
+    }
+
+    .mission-meta {
+      text-align: right;
+    }
+
+    .mission-status {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border: 1px solid;
+      margin-bottom: 16px;
+    }
+
+    .status-complete { border-color: var(--accent); color: var(--accent); }
+    .status-ongoing  { border-color: #f5f5f5; color: #f5f5f5; }
+    .status-legend   { border-color: var(--muted); color: var(--muted); }
+
+    .mission-year {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    /* BIG QUOTE */
+    .quote-block {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      border-top: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .quote-block.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .quote-block blockquote {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      line-height: 1.3;
+      color: var(--text);
+      max-width: 800px;
+    }
+
+    .quote-attr {
+      margin-top: 20px;
+      font-size: 0.75rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 700px) {
+      .mission-item { grid-template-columns: 50px 1fr; }
+      .mission-meta { grid-column: 2; text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="nav-brand" href="index.html">Brian Bors</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="missions.html" class="active">Missions</a>
+    <a href="enemies.html">Enemies</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <h1 class="page-title">MISSIONS</h1>
+    <p class="page-desc">
+      A classified record of operations completed, empires dismantled,
+      and impossible odds turned to dust. Not all are meant for public eyes.
+    </p>
+  </div>
+</div>
+
+<div class="missions-section">
+
+  <div class="mission-item">
+    <div class="mission-num">01</div>
+    <div class="mission-body">
+      <h3>The Monaco Extraction</h3>
+      <p>Walked into a high-security vault in the middle of the Monaco Grand Prix weekend. Left before the champagne was poured. Nobody noticed until Tuesday.</p>
+    </div>
+    <div class="mission-meta">
+      <span class="mission-status status-complete">Complete</span>
+      <span class="mission-year">2019</span>
+    </div>
+  </div>
+
+  <div class="mission-item">
+    <div class="mission-num">02</div>
+    <div class="mission-body">
+      <h3>Operation Ghost Meridian</h3>
+      <p>Six border crossings, three passports, zero traceable transactions. Delivered an item no one will confirm exists to a buyer no one will name. Textbook.</p>
+    </div>
+    <div class="mission-meta">
+      <span class="mission-status status-complete">Complete</span>
+      <span class="mission-year">2020</span>
+    </div>
+  </div>
+
+  <div class="mission-item">
+    <div class="mission-num">03</div>
+    <div class="mission-body">
+      <h3>The Riviera Accord</h3>
+      <p>Brokered a peace between two cartels over dinner. The restaurant never reopened — not because anything went wrong, but because the vibe afterward was simply unmatched.</p>
+    </div>
+    <div class="mission-meta">
+      <span class="mission-status status-legend">Legend</span>
+      <span class="mission-year">2021</span>
+    </div>
+  </div>
+
+  <div class="mission-item">
+    <div class="mission-num">04</div>
+    <div class="mission-body">
+      <h3>Dark Sky Protocol</h3>
+      <p>Disappeared for eleven months. When he resurfaced, three governments had changed hands and four oligarchs had quietly retired. Coincidence is a word for people who don't know Brian Bors.</p>
+    </div>
+    <div class="mission-meta">
+      <span class="mission-status status-legend">Legend</span>
+      <span class="mission-year">2022–23</span>
+    </div>
+  </div>
+
+  <div class="mission-item">
+    <div class="mission-num">05</div>
+    <div class="mission-body">
+      <h3>The Unfinished Game</h3>
+      <p>Details remain classified. Informants go quiet when asked. What's known: it started in Tokyo, it involves a chess set, and it is not over.</p>
+    </div>
+    <div class="mission-meta">
+      <span class="mission-status status-ongoing">Ongoing</span>
+      <span class="mission-year">2024–</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="quote-block">
+  <blockquote>
+    "He doesn't plan missions. He walks into rooms and missions happen around him."
+  </blockquote>
+  <p class="quote-attr">— Unnamed intelligence analyst, redacted debrief, 2023</p>
+</div>
+
+<footer>© 2026 Brian Bors Fanpage</footer>
+
+<script>
+  const reveals = document.querySelectorAll(".mission-item, .quote-block");
+  function check() {
+    const trigger = window.innerHeight * 0.88;
+    reveals.forEach(el => {
+      if (el.getBoundingClientRect().top < trigger) el.classList.add("active");
+    });
+  }
+  window.addEventListener("scroll", check);
+  check();
+</script>
+
+</body>
+</html>

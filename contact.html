@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brian Bors — Contact</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #f5f5f5;
+      --muted: #9a9a9a;
+      --accent: #c8a96e;
+      --line: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      padding: 18px 30px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(10,10,10,0.7);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 4px;
+      font-size: 1.1rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      margin-left: 30px;
+      transition: color 0.3s;
+      text-transform: uppercase;
+    }
+
+    nav a:hover, nav a.active { color: var(--text); }
+
+    /* MAIN LAYOUT */
+    .contact-layout {
+      min-height: 100vh;
+      max-width: 1100px;
+      margin: auto;
+      padding: 140px 20px 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    /* LEFT */
+    .contact-left h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 9vw, 7.5rem);
+      line-height: 0.85;
+      margin-bottom: 40px;
+    }
+
+    .contact-left p {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.95;
+      max-width: 380px;
+      margin-bottom: 60px;
+    }
+
+    .contact-methods {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .contact-method {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .contact-method.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .method-label {
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .method-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-align: right;
+    }
+
+    /* RIGHT — FORM */
+    .contact-right {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s;
+    }
+
+    .contact-right.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .form-header {
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .form-field {
+      margin-bottom: 32px;
+    }
+
+    .form-field label {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.9rem;
+      padding: 10px 0;
+      outline: none;
+      transition: border-color 0.3s;
+      -webkit-appearance: none;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-field select option {
+      background: #1a1a1a;
+      color: var(--text);
+    }
+
+    .form-field textarea {
+      resize: none;
+      height: 100px;
+    }
+
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+      color: rgba(255,255,255,0.15);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--text);
+      color: var(--text);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+      padding: 18px;
+      cursor: crosshair;
+      transition: all 0.4s ease;
+      margin-top: 10px;
+    }
+
+    .submit-btn:hover {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    /* DISCLAIMER */
+    .disclaimer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 100px;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1s ease;
+    }
+
+    .disclaimer.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .disclaimer p {
+      font-size: 0.7rem;
+      color: rgba(154,154,154,0.4);
+      line-height: 1.8;
+      max-width: 700px;
+    }
+
+    /* CONFIRMATION */
+    .confirm-msg {
+      display: none;
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--accent);
+      margin-top: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 750px) {
+      .contact-layout {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="nav-brand" href="index.html">Brian Bors</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="missions.html">Missions</a>
+    <a href="enemies.html">Enemies</a>
+    <a href="contact.html" class="active">Contact</a>
+  </nav>
+</header>
+
+<div class="contact-layout">
+
+  <!-- LEFT -->
+  <div class="contact-left">
+    <h1>GET IN<br>TOUCH</h1>
+    <p>
+      Brian Bors does not advertise. He does not have a PR team.
+      If you need him, you already know how to reach him. 
+      But for the uninitiated — this form exists. Use it wisely.
+      He reads everything. He responds to almost nothing.
+    </p>
+
+    <div class="contact-methods">
+      <div class="contact-method">
+        <span class="method-label">Location</span>
+        <span class="method-value">Classified</span>
+      </div>
+      <div class="contact-method">
+        <span class="method-label">Availability</span>
+        <span class="method-value">When it suits him</span>
+      </div>
+      <div class="contact-method">
+        <span class="method-label">Response time</span>
+        <span class="method-value">72 hrs — or never</span>
+      </div>
+      <div class="contact-method">
+        <span class="method-label">Encryption</span>
+        <span class="method-value">End-to-end</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="contact-right">
+    <p class="form-header">Transmission Form — Eyes Only</p>
+
+    <div class="form-field">
+      <label>Your Name</label>
+      <input type="text" placeholder="John Doe" id="name-input"/>
+    </div>
+
+    <div class="form-field">
+      <label>Secure Channel</label>
+      <input type="email" placeholder="encrypted@domain.com"/>
+    </div>
+
+    <div class="form-field">
+      <label>Nature of Contact</label>
+      <select>
+        <option value="" disabled selected>Select a reason</option>
+        <option>Business proposition</option>
+        <option>Alliance request</option>
+        <option>Surrender</option>
+        <option>Other (explain below)</option>
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>Message</label>
+      <textarea placeholder="Keep it brief. He values efficiency."></textarea>
+    </div>
+
+    <button class="submit-btn" onclick="handleSubmit()">TRANSMIT MESSAGE</button>
+    <p class="confirm-msg" id="confirm">Transmission received. Do not expect a reply. Expect results.</p>
+  </div>
+</div>
+
+<div class="disclaimer">
+  <p>
+    All communications are monitored, analyzed, and archived. 
+    By submitting this form you acknowledge that Brian Bors assumes no legal responsibility 
+    for whatever is set in motion. His methods are his own. His results are undeniable. 
+    This is not a threat. This is a disclaimer.
+  </p>
+</div>
+
+<footer>© 2026 Brian Bors Fanpage</footer>
+
+<script>
+  // Scroll reveals
+  const reveals = document.querySelectorAll(".contact-method, .contact-right, .disclaimer");
+  function check() {
+    const trigger = window.innerHeight * 0.9;
+    reveals.forEach((el, i) => {
+      if (el.getBoundingClientRect().top < trigger) {
+        setTimeout(() => el.classList.add("active"), i * 80);
+      }
+    });
+  }
+  window.addEventListener("scroll", check);
+
+  // Trigger left column on load
+  setTimeout(() => {
+    document.querySelectorAll('.contact-method').forEach((el, i) => {
+      setTimeout(() => el.classList.add('active'), 300 + i * 100);
+    });
+    document.querySelector('.contact-right').classList.add('active');
+  }, 200);
+
+  check();
+
+  // Form submit
+  function handleSubmit() {
+    const name = document.getElementById('name-input').value.trim();
+    const confirm = document.getElementById('confirm');
+    confirm.style.display = 'block';
+    if (name) {
+      confirm.textContent = `Transmission received, ${name}. Do not expect a reply. Expect results.`;
+    } else {
+      confirm.textContent = `Transmission received. Do not expect a reply. Expect results.`;
+    }
+  }
+</script>
+
+</body>
+</html>
