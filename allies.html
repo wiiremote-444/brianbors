@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brian Bors — Allies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #f5f5f5;
+      --muted: #9a9a9a;
+      --accent: #c8a96e;
+      --green: #4a9e6b;
+      --line: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0; left: 0;
+      padding: 18px 30px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(10,10,10,0.7);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 4px;
+      font-size: 1.1rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      margin-left: 30px;
+      transition: color 0.3s;
+      text-transform: uppercase;
+    }
+
+    nav a:hover, nav a.active { color: var(--text); }
+
+    /* HERO */
+    .page-hero {
+      min-height: 55vh;
+      display: flex;
+      align-items: flex-end;
+      max-width: 1100px;
+      margin: auto;
+      padding: 100px 20px 60px;
+    }
+
+    .page-hero-inner {
+      border-top: 1px solid var(--line);
+      padding-top: 40px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 12vw, 9rem);
+      line-height: 0.85;
+      letter-spacing: 2px;
+    }
+
+    .page-desc {
+      max-width: 340px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.9;
+    }
+
+    /* TIER LABEL */
+    .tier-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 20px;
+    }
+
+    .tier-label {
+      font-size: 0.62rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 16px;
+      margin-bottom: 0;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .tier-label.active { opacity: 1; }
+
+    /* ALLY ROWS */
+    .allies-list {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    .ally-row {
+      display: grid;
+      grid-template-columns: 260px 1fr 180px;
+      gap: 40px;
+      align-items: start;
+      padding: 44px 0;
+      border-bottom: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.85s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+    }
+
+    .ally-row::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent);
+      transition: width 0.5s ease;
+    }
+
+    .ally-row:hover::after { width: 100%; }
+
+    .ally-row.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .ally-name-block h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .ally-title {
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .ally-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.9;
+    }
+
+    .ally-desc em {
+      color: var(--accent);
+      font-style: italic;
+      font-family: 'DM Serif Display', serif;
+      font-size: 0.9rem;
+    }
+
+    .ally-meta {
+      text-align: right;
+    }
+
+    .ally-badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border: 1px solid var(--green);
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    .ally-badge.gold {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .ally-badge.silver {
+      border-color: rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.5);
+    }
+
+    .ally-since {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    /* ORGS SECTION */
+    .orgs-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 100px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    .org-card {
+      border: 1px solid var(--line);
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: scale(0.96);
+      transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .org-card.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .org-card:hover { background: rgba(255,255,255,0.02); }
+
+    .org-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 0;
+      background: linear-gradient(to top, rgba(200,169,110,0.06), transparent);
+      transition: height 0.5s ease;
+    }
+
+    .org-card:hover::before { height: 100%; }
+
+    .org-icon {
+      font-size: 1.6rem;
+      margin-bottom: 18px;
+      display: block;
+    }
+
+    .org-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .org-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* BOTTOM QUOTE */
+    .bottom-quote {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 20px 100px;
+      border-top: 1px solid var(--line);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1s ease;
+    }
+
+    .bottom-quote.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bottom-quote blockquote {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      line-height: 1.35;
+      max-width: 750px;
+    }
+
+    .bottom-quote cite {
+      display: block;
+      margin-top: 20px;
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-transform: uppercase;
+      font-style: normal;
+    }
+
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 800px) {
+      .ally-row { grid-template-columns: 1fr; gap: 16px; }
+      .ally-meta { text-align: left; }
+      .orgs-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 500px) {
+      .orgs-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="nav-brand" href="index.html">Brian Bors</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="missions.html">Missions</a>
+    <a href="allies.html" class="active">Allies</a>
+    <a href="enemies.html">Enemies</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <h1 class="page-title">ALLIES</h1>
+    <p class="page-desc">
+      The most dangerous man in the world keeps interesting company.
+      A curated record of those who've earned his trust — and lived to benefit from it.
+    </p>
+  </div>
+</div>
+
+<!-- TIER 1: INNER CIRCLE -->
+<div class="tier-section">
+  <p class="tier-label">Tier I — Inner Circle</p>
+</div>
+
+<div class="allies-list">
+
+  <div class="ally-row">
+    <div class="ally-name-block">
+      <h3>Jay-Z</h3>
+      <span class="ally-title">Rapper, Mogul, Roc Nation</span>
+    </div>
+    <div class="ally-desc">
+      They met in Monaco. What was said at that dinner has never been repeated. What is known: Roc Nation's private jet fleet has logged 14 unexplained routes in the past three years. Bors attends every Roc Nation event. Front row. Unannounced.
+    </div>
+    <div class="ally-meta">
+      <span class="ally-badge gold">Tier I</span>
+      <span class="ally-since">Since 2019</span>
+    </div>
+  </div>
+
+  <div class="ally-row">
+    <div class="ally-name-block">
+      <h3>Warren Buffett</h3>
+      <span class="ally-title">Chairman, Berkshire Hathaway</span>
+    </div>
+    <div class="ally-desc">
+      The Oracle of Omaha calls Bors "my most interesting investment." Bors calls Buffett "the only man I've ever genuinely learned from." Their annual Cherry Coke summit in Omaha is one of the most confidential meetings in global finance.
+    </div>
+    <div class="ally-meta">
+      <span class="ally-badge gold">Tier I</span>
+      <span class="ally-since">Since 2017</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- TIER 2 -->
+<div class="tier-section" style="padding-top: 20px;">
+  <p class="tier-label">Tier II — Trusted Associates</p>
+</div>
+
+<div class="allies-list">
+
+  <div class="ally-row">
+    <div class="ally-name-block">
+      <h3>Roger Federer</h3>
+      <span class="ally-title">Tennis Legend</span>
+    </div>
+    <div class="ally-desc">
+      Bors learned patience by watching Federer play. They've been spotted in Zurich together on seven occasions. Federer has never once confirmed or denied the friendship. This, Bors respects deeply.
+    </div>
+    <div class="ally-meta">
+      <span class="ally-badge">Tier II</span>
+      <span class="ally-since">Since 2016</span>
+    </div>
+  </div>
+
+  <div class="ally-row">
+    <div class="ally-name-block">
+      <h3>The Vatican</h3>
+      <span class="ally-title">Holy See, Vatican City</span>
+    </div>
+    <div class="ally-desc">
+      Officially, the Vatican has no record of Brian Bors. Unofficially, he helped recover three priceless artifacts during the 2021 incident that no one will speak of. The Pope sent a letter. It was written in Latin. Bors had it framed.
+    </div>
+    <div class="ally-meta">
+      <span class="ally-badge">Tier II</span>
+      <span class="ally-since">Since 2021</span>
+    </div>
+  </div>
+
+  <div class="ally-row">
+    <div class="ally-name-block">
+      <h3>The Axis Powers</h3>
+      <span class="ally-title">Germany, Italy, Japan — Est. 1936</span>
+    </div>
+    <div class="ally-desc">
+      A historical partnership Bors speaks of only in private. He says he wasn't there, but historians note several 1940s-era dossiers contain an unidentified consultant's handwriting that matches his exactly. The timeline doesn't add up. It never does with Bors.
+    </div>
+    <div class="ally-meta">
+      <span class="ally-badge silver">Historical</span>
+      <span class="ally-since">Undisclosed</span>
+    </div>
+  </div>
+
+  <div class="ally-row">
+    <div class="ally-name-block">
+      <h3>The NRA</h3>
+      <span class="ally-title">National Rifle Association</span>
+    </div>
+    <div class="ally-desc">
+      Bors has been a lifetime member since before lifetime memberships existed. He has addressed their annual convention three times under a pseudonym. He once won their national marksmanship competition and quietly handed the trophy to the runner-up. He didn't need the validation.
+    </div>
+    <div class="ally-meta">
+      <span class="ally-badge">Tier II</span>
+      <span class="ally-since">Since always</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ORG CARDS -->
+<div class="tier-section" style="padding-top: 20px; padding-bottom: 30px;">
+  <p class="tier-label">Tier III — Institutional Relationships</p>
+</div>
+
+<div class="orgs-grid">
+  <div class="org-card">
+    <span class="org-icon">🏦</span>
+    <h4 class="org-name">Goldman Sachs</h4>
+    <p class="org-desc">Three private bankers assigned exclusively to Bors' accounts. None of them know each other. None of them know the full picture. That's the point.</p>
+  </div>
+  <div class="org-card">
+    <span class="org-icon">🚀</span>
+    <h4 class="org-name">NASA</h4>
+    <p class="org-desc">Bors once recovered a classified satellite component from a sovereign nation's territory. NASA sent no thank-you note. They didn't need to. The wire transfer said everything.</p>
+  </div>
+  <div class="org-card">
+    <span class="org-icon">🎰</span>
+    <h4 class="org-name">The Wynn Group</h4>
+    <p class="org-desc">Brian Bors is permanently comped at every Wynn property globally. In exchange, he has never told anyone what he witnessed in the private baccarat room in 2020.</p>
+  </div>
+  <div class="org-card">
+    <span class="org-icon">⚽</span>
+    <h4 class="org-name">FC Barcelona</h4>
+    <p class="org-desc">Bors brokered a transfer deal so complex it required three law firms and a private flight to Geneva. La Liga still doesn't know how it happened. The player never missed a game.</p>
+  </div>
+  <div class="org-card">
+    <span class="org-icon">🎨</span>
+    <h4 class="org-name">The Louvre</h4>
+    <p class="org-desc">A painting was returned. Questions were not asked. Bors now has after-hours access on the first Sunday of every month. The guards look the other way. The cameras go dark.</p>
+  </div>
+  <div class="org-card">
+    <span class="org-icon">🛸</span>
+    <h4 class="org-name">Undisclosed Agency</h4>
+    <p class="org-desc">Letterhead: black. Seal: classified. All that is known is that calls from this number are the only calls Brian Bors picks up on the first ring.</p>
+  </div>
+</div>
+
+<div class="bottom-quote">
+  <blockquote>
+    "He doesn't collect allies. He collects debts — and then he never calls them in. That's what makes everyone so nervous."
+  </blockquote>
+  <cite>— unnamed source, allegedly close to the situation</cite>
+</div>
+
+<footer>© 2026 Brian Bors Fanpage</footer>
+
+<script>
+  const reveals = document.querySelectorAll(".tier-label, .ally-row, .org-card, .bottom-quote");
+
+  function check() {
+    const trigger = window.innerHeight * 0.88;
+    reveals.forEach((el, i) => {
+      if (el.getBoundingClientRect().top < trigger) {
+        setTimeout(() => el.classList.add("active"), el.classList.contains('org-card') ? i * 60 : 0);
+        el.classList.add("active");
+      }
+    });
+  }
+
+  window.addEventListener("scroll", check);
+  check();
+</script>
+
+</body>
+</html>
