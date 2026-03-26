@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brian Bors — Chronicle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #f5f5f5;
+      --muted: #9a9a9a;
+      --accent: #c8a96e;
+      --red: #b84040;
+      --green: #4a9e6b;
+      --line: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* ── NOISE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ── CUSTOM SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); }
+
+    /* ── NAV ── */
+    header {
+      position: fixed;
+      width: 100%;
+      top: 0; left: 0;
+      padding: 18px 30px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(10,10,10,0.75);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 4px;
+      font-size: 1.1rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      margin-left: 28px;
+      transition: color 0.3s;
+      text-transform: uppercase;
+    }
+    nav a:hover, nav a.active { color: var(--text); }
+
+    /* ── CINEMATIC HERO ── */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* animated scanline sweep */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.015) 2px,
+        rgba(255,255,255,0.015) 4px
+      );
+      pointer-events: none;
+      animation: scanMove 8s linear infinite;
+    }
+
+    @keyframes scanMove {
+      from { background-position: 0 0; }
+      to   { background-position: 0 400px; }
+    }
+
+    /* sweeping light beam */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: -50%;
+      width: 200%;
+      height: 40%;
+      background: linear-gradient(to bottom, transparent, rgba(200,169,110,0.03), transparent);
+      animation: beam 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes beam {
+      0%   { top: -40%; }
+      100% { top: 140%; }
+    }
+
+    .hero-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.4s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(6rem, 16vw, 13rem);
+      line-height: 0.82;
+      letter-spacing: 4px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero-title span {
+      display: block;
+      opacity: 0;
+      transform: translateY(120px);
+      animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .hero-title span:nth-child(1) { animation-delay: 0.1s; }
+    .hero-title span:nth-child(2) { animation-delay: 0.25s; }
+
+    @keyframes slideUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-sub {
+      font-size: 0.78rem;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 36px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.9s forwards;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeUp 1s ease 1.4s forwards;
+    }
+
+    .scroll-hint span {
+      font-size: 0.58rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .scroll-arrow {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(1); }
+      50%       { opacity: 1;   transform: scaleY(1.1); }
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: var(--accent);
+      z-index: 9998;
+      width: 0%;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    /* ── YEAR SIDEBAR ── */
+    .year-sidebar {
+      position: fixed;
+      left: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 50;
+    }
+
+    .year-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      border: 1px solid var(--muted);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .year-dot.current {
+      background: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .year-dot:hover .year-dot-label { opacity: 1; transform: translateX(0); }
+
+    .year-dot-label {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateX(-8px) translateY(-50%);
+      font-size: 0.58rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      white-space: nowrap;
+      opacity: 0;
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+
+    /* ── TIMELINE SECTION ── */
+    .timeline-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 160px;
+      position: relative;
+    }
+
+    /* central spine */
+    .timeline-spine {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--line);
+      transform: translateX(-50%);
+    }
+
+    .timeline-spine-fill {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      background: linear-gradient(to bottom, var(--accent), rgba(200,169,110,0.3));
+      height: 0%;
+      transition: height 0.1s linear;
+      box-shadow: 0 0 6px rgba(200,169,110,0.4);
+    }
+
+    /* ── YEAR MARKER ── */
+    .year-marker {
+      text-align: center;
+      margin: 100px 0 0;
+      position: relative;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .year-marker.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .year-marker-inner {
+      display: inline-block;
+      position: relative;
+    }
+
+    .year-marker-inner::before,
+    .year-marker-inner::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent));
+    }
+
+    .year-marker-inner::before {
+      right: calc(100% + 16px);
+      transform: rotate(180deg);
+    }
+
+    .year-marker-inner::after {
+      left: calc(100% + 16px);
+    }
+
+    .year-marker h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 5rem;
+      letter-spacing: 6px;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(200,169,110,0.5);
+      line-height: 1;
+    }
+
+    /* ── EVENT CARD ── */
+    .event {
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr;
+      gap: 0;
+      margin: 60px 0;
+      position: relative;
+    }
+
+    /* left-side events */
+    .event.left .event-content {
+      grid-column: 1;
+      text-align: right;
+      padding-right: 50px;
+    }
+
+    .event.left .event-node { grid-column: 2; }
+    .event.left .event-spacer { grid-column: 3; }
+
+    /* right-side events */
+    .event.right .event-spacer { grid-column: 1; }
+    .event.right .event-node   { grid-column: 2; }
+    .event.right .event-content {
+      grid-column: 3;
+      text-align: left;
+      padding-left: 50px;
+    }
+
+    .event-node {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .event-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: var(--bg);
+      position: relative;
+      transition: all 0.4s ease;
+      flex-shrink: 0;
+    }
+
+    .event-dot::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,169,110,0.2);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .event-dot::after {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,169,110,0.1);
+      opacity: 0;
+      transition: opacity 0.4s ease 0.05s;
+    }
+
+    .event:hover .event-dot {
+      background: var(--accent);
+      box-shadow: 0 0 20px rgba(200,169,110,0.5);
+    }
+
+    .event:hover .event-dot::before { opacity: 1; }
+    .event:hover .event-dot::after  { opacity: 1; }
+
+    /* card */
+    .event-content {
+      opacity: 0;
+      transition: all 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .event.left .event-content {
+      transform: translateX(-60px);
+    }
+
+    .event.right .event-content {
+      transform: translateX(60px);
+    }
+
+    .event.active .event-content {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .event-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      padding: 30px 28px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .event-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(200,169,110,0.05), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .event-card:hover { border-color: rgba(200,169,110,0.25); }
+    .event-card:hover::before { opacity: 1; }
+
+    /* shimmer sweep on hover */
+    .event-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.7s ease;
+    }
+
+    .event-card:hover::after { left: 160%; }
+
+    .event-tag {
+      font-size: 0.58rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .tag-classified { color: var(--red); }
+    .tag-complete   { color: var(--accent); }
+    .tag-legend     { color: var(--muted); }
+    .tag-unknown    { color: rgba(255,255,255,0.3); }
+    .tag-ongoing    { color: #7eb8f7; }
+
+    .event-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .event-desc {
+      font-size: 0.77rem;
+      color: var(--muted);
+      line-height: 1.9;
+    }
+
+    .event-year-badge {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      color: rgba(200,169,110,0.5);
+      margin-top: 16px;
+      display: block;
+    }
+
+    /* expanded detail (click to open) */
+    .event-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), padding 0.4s ease;
+    }
+
+    .event-detail.open {
+      max-height: 200px;
+      padding-top: 16px;
+    }
+
+    .event-detail p {
+      font-size: 0.72rem;
+      color: rgba(154,154,154,0.7);
+      line-height: 1.85;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+
+    /* connector line from dot to card */
+    .event-connector {
+      position: absolute;
+      top: 50%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(200,169,110,0.3));
+      transition: background 0.4s ease;
+    }
+
+    .event.left .event-connector {
+      right: 100%;
+      left: 0;
+      background: linear-gradient(to left, transparent, rgba(200,169,110,0.3));
+    }
+
+    .event.right .event-connector {
+      left: 100%;
+      right: 0;
+    }
+
+    /* ── CLASSIFIED BANNER ── */
+    .classified-banner {
+      text-align: center;
+      padding: 120px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .classified-banner::before {
+      content: 'CLASSIFIED';
+      position: absolute;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20vw;
+      color: rgba(184,64,64,0.04);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      white-space: nowrap;
+      pointer-events: none;
+      animation: classifiedPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes classifiedPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .classified-banner p {
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--red);
+      opacity: 0.6;
+    }
+
+    /* ── STAT TICKER ── */
+    .stats-ticker {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1s ease;
+    }
+
+    .stats-ticker.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .ticker-item {
+      border: 1px solid var(--line);
+      padding: 32px 28px;
+    }
+
+    .ticker-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3.5rem;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .ticker-label {
+      font-size: 0.62rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── GLITCH ── */
+    @keyframes glitch {
+      0%   { clip-path: inset(20% 0 60% 0); transform: translate(-4px, 0); }
+      20%  { clip-path: inset(80% 0 2% 0);  transform: translate(4px, 0); }
+      40%  { clip-path: inset(40% 0 40% 0); transform: translate(-2px, 0); }
+      60%  { clip-path: inset(60% 0 10% 0); transform: translate(2px, 0); }
+      80%  { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 0); }
+      100% { clip-path: inset(0% 0 90% 0);  transform: translate(0, 0); }
+    }
+
+    .glitch-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .glitch-wrap::before,
+    .glitch-wrap::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: inherit;
+      letter-spacing: inherit;
+      line-height: inherit;
+    }
+
+    .glitch-wrap::before {
+      color: #ff3333;
+      animation: glitch 3s steps(1) infinite;
+      animation-play-state: paused;
+    }
+
+    .glitch-wrap::after {
+      color: #33ffcc;
+      animation: glitch 3s steps(1) 0.1s infinite;
+      animation-play-state: paused;
+    }
+
+    .glitch-wrap:hover::before,
+    .glitch-wrap:hover::after {
+      animation-play-state: running;
+    }
+
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 700px) {
+      .timeline-spine { left: 24px; }
+      .event { grid-template-columns: 48px 1fr; }
+      .event.left .event-content,
+      .event.right .event-content {
+        grid-column: 2;
+        text-align: left;
+        padding-left: 20px;
+        padding-right: 0;
+      }
+      .event.left .event-node,
+      .event.right .event-node { grid-column: 1; }
+      .event.left .event-spacer,
+      .event.right .event-spacer { display: none; }
+      .year-sidebar { display: none; }
+      .stats-ticker { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<header>
+  <a class="nav-brand" href="index.html">Brian Bors</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="missions.html">Missions</a>
+    <a href="allies.html">Allies</a>
+    <a href="enemies.html">Enemies</a>
+    <a href="locations.html">Locations</a>
+    <a href="timeline.html" class="active">Chronicle</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<!-- SIDEBAR DOTS -->
+<div class="year-sidebar" id="yearSidebar"></div>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <p class="hero-eyebrow">The Complete Record — Declassified</p>
+  <h1 class="hero-title">
+    <span class="glitch-wrap" data-text="BRIAN">BRIAN</span>
+    <span class="glitch-wrap" data-text="BORS">BORS</span>
+  </h1>
+  <p class="hero-sub">A Life in Events &nbsp;·&nbsp; Est. Unknown</p>
+
+  <div class="scroll-hint">
+    <span>Scroll to descend</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</div>
+
+<!-- ── TIMELINE ── -->
+<div class="timeline-section" id="timeline">
+  <div class="timeline-spine">
+    <div class="timeline-spine-fill" id="spineFill"></div>
+  </div>
+
+  <!-- ════ EARLY YEARS ════ -->
+  <div class="year-marker" data-year="1990s" id="y1990">
+    <div class="year-marker-inner">
+      <h2>ORIGINS</h2>
+    </div>
+  </div>
+
+  <div class="event left" data-year="y1990">
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-unknown">Unverified</span>
+        <h3 class="event-title">The Birth</h3>
+        <p class="event-desc">Date, location, and circumstances of birth remain disputed. Three countries claim him. All three are wrong. He has never corrected the record.</p>
+        <span class="event-year-badge">Unknown — Somewhere</span>
+        <div class="event-detail">
+          <p>Hospital records from Zurich, Naples, and Buenos Aires each carry a matching entry. Interpol investigators concluded the files were planted. They were right. That's all they got right.</p>
+        </div>
+      </div>
+    </div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-spacer"></div>
+  </div>
+
+  <div class="event right" data-year="y1990">
+    <div class="event-spacer"></div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-legend">Legend</span>
+        <h3 class="event-title">First Known Language</h3>
+        <p class="event-desc">By age 9, he was fluent in four languages. By age 11, he had invented a fifth — used exclusively in correspondence with a single unknown recipient.</p>
+        <span class="event-year-badge">circa 1995</span>
+        <div class="event-detail">
+          <p>Linguists at Oxford were shown a sample in 2018. Two of them resigned shortly after. The third converted to a hermetic lifestyle in rural Portugal. The language remains undeciphered.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 2000s ════ -->
+  <div class="year-marker" data-year="2000s" id="y2000">
+    <div class="year-marker-inner">
+      <h2>2000s</h2>
+    </div>
+  </div>
+
+  <div class="event left" data-year="y2000">
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-classified">Classified</span>
+        <h3 class="event-title">The Prague Incident</h3>
+        <p class="event-desc">A seventeen-year-old walks into the most secure private auction in Central Europe. Walks out with something that wasn't for sale. Nobody remembers his face.</p>
+        <span class="event-year-badge">2002 — Prague</span>
+        <div class="event-detail">
+          <p>Czech intelligence filed a report. The report was later acquired and shredded by a party using credentials belonging to a deceased diplomat. The auction house was sold six months later at a significant loss. Coincidence.</p>
+        </div>
+      </div>
+    </div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-spacer"></div>
+  </div>
+
+  <div class="event right" data-year="y2000">
+    <div class="event-spacer"></div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-complete">Complete</span>
+        <h3 class="event-title">First Million</h3>
+        <p class="event-desc">Made his first million at age 19. No documented source. No taxes filed. The IRS opened an inquiry and then quietly closed it eighteen months later. Nobody got a memo.</p>
+        <span class="event-year-badge">2004 — Unknown</span>
+        <div class="event-detail">
+          <p>His accountant from that period now lives on a private island and no longer practices. She has consistently refused interviews. She does, however, smile when his name is mentioned.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="event left" data-year="y2000">
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-legend">Legend</span>
+        <h3 class="event-title">The Monaco Poker Game</h3>
+        <p class="event-desc">A 28-hour poker game in a Monaco penthouse. Four heads of state, two oil oligarchs, and Brian Bors. He left with the deed to an island and a handshake agreement that still governs a small nation's trade policy today.</p>
+        <span class="event-year-badge">2007 — Monaco</span>
+        <div class="event-detail">
+          <p>Two players claimed to have been cheated. Both later withdrew the allegation simultaneously. Neither would say why. The island remains unregistered on any maritime chart.</p>
+        </div>
+      </div>
+    </div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-spacer"></div>
+  </div>
+
+  <!-- ════ 2010s ════ -->
+  <div class="year-marker" data-year="2010s" id="y2010">
+    <div class="year-marker-inner">
+      <h2>2010s</h2>
+    </div>
+  </div>
+
+  <div class="event right" data-year="y2010">
+    <div class="event-spacer"></div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-classified">Classified</span>
+        <h3 class="event-title">Dark Sky Protocol</h3>
+        <p class="event-desc">Vanished for eleven months. No sightings. No transactions. No communications. When he resurfaced, three governments had changed hands. He ordered a steak and said nothing about it.</p>
+        <span class="event-year-badge">2012–2013 — Classified</span>
+        <div class="event-detail">
+          <p>His phone was found in a dead drop in Marrakech. It contained a single photo: a chessboard mid-game. The position has never been identified as any known match.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="event left" data-year="y2010">
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-complete">Complete</span>
+        <h3 class="event-title">The Buffett Summit</h3>
+        <p class="event-desc">First meeting with Warren Buffett in Omaha. Official cover: a Cherry Coke taste test. Actual agenda: unknown. The meeting lasted nine hours. Berkshire's quarterly filing that season looked different from anything before.</p>
+        <span class="event-year-badge">2017 — Omaha, Nebraska</span>
+        <div class="event-detail">
+          <p>Three analysts tried to reverse-engineer the trades that followed. Two left the industry. The third now teaches philosophy at a community college in Vermont and seems much happier.</p>
+        </div>
+      </div>
+    </div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-spacer"></div>
+  </div>
+
+  <div class="event right" data-year="y2010">
+    <div class="event-spacer"></div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-complete">Complete</span>
+        <h3 class="event-title">Roc Nation Summit — Monaco</h3>
+        <p class="event-desc">Met Jay-Z over dinner in Monaco. What was said has never been repeated. What followed: 14 unexplained private jet routes, a joint venture nobody could locate in any filing, and mutual front-row appearances at industry events.</p>
+        <span class="event-year-badge">2019 — Monaco</span>
+        <div class="event-detail">
+          <p>A journalist who claimed to have a photo of the two men together later found that every photo on their camera from that night had been replaced with an identical image of an empty table set for two.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ 2020s ════ -->
+  <div class="year-marker" data-year="2020s" id="y2020">
+    <div class="year-marker-inner">
+      <h2>2020s</h2>
+    </div>
+  </div>
+
+  <div class="event left" data-year="y2020">
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-complete">Complete</span>
+        <h3 class="event-title">Operation Ghost Meridian</h3>
+        <p class="event-desc">Six border crossings. Three passports. Zero traceable transactions. He delivered something no one will confirm exists to a buyer no one will name. Called it a "Tuesday."</p>
+        <span class="event-year-badge">2020 — Six Countries</span>
+        <div class="event-detail">
+          <p>Customs records across all six countries contain a matching three-hour gap. Officials investigated independently and reached the same conclusion: the gap was intentional, professional, and permanent.</p>
+        </div>
+      </div>
+    </div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-spacer"></div>
+  </div>
+
+  <div class="event right" data-year="y2020">
+    <div class="event-spacer"></div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-legend">Legend</span>
+        <h3 class="event-title">The Riviera Accord</h3>
+        <p class="event-desc">Brokered peace between two cartels over a single dinner. The restaurant never reopened — not because anything went wrong, but because the vibe afterward was simply unmatched and nothing could ever live up to it.</p>
+        <span class="event-year-badge">2021 — French Riviera</span>
+        <div class="event-detail">
+          <p>The chef who cooked the dinner has since moved to a mountain village and refuses to discuss the menu. He will say only that it was "the best and last thing" he ever made. He seems at peace.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="event left" data-year="y2020">
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-classified">Classified</span>
+        <h3 class="event-title">The Vatican Recovery</h3>
+        <p class="event-desc">Three priceless artifacts. Recovered from a sovereign nation's territory. No troops, no diplomacy, no headlines. The Pope wrote a letter in Latin. Bors had it framed. He placed it in storage.</p>
+        <span class="event-year-badge">2021 — Vatican City</span>
+        <div class="event-detail">
+          <p>Vatican records for this period contain a page designated "Per Voluntatem Dei" — By the Will of God. That page is blank. Archivists believe it is intentionally blank. They are correct.</p>
+        </div>
+      </div>
+    </div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-spacer"></div>
+  </div>
+
+  <div class="event right" data-year="y2020">
+    <div class="event-spacer"></div>
+    <div class="event-node"><div class="event-dot"></div></div>
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-complete">Complete</span>
+        <h3 class="event-title">The Louvre After Hours</h3>
+        <p class="event-desc">A painting was returned. No questions were asked. In exchange, Bors received after-hours access on the first Sunday of every month. The cameras go dark. The guards look away. He stands alone in the wing for exactly one hour.</p>
+        <span class="event-year-badge">2022 — Paris</span>
+        <div class="event-detail">
+          <p>Security logs from those Sunday visits show only static. Staff on those nights are rotated from a separate roster. None of them have met each other. None of them ask why.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ NOW ════ -->
+  <div class="year-marker" data-year="now" id="ynow">
+    <div class="year-marker-inner">
+      <h2>NOW</h2>
+    </div>
+  </div>
+
+  <div class="event left" data-year="ynow">
+    <div class="event-content">
+      <div class="event-card" onclick="toggleDetail(this)">
+        <span class="event-tag tag-ongoing">Ongoing</span>
+        <h3 class="event-title">The Unfinished Game</h3>
+        <p class="event-desc">Started in Tokyo. Involves a chess set. Spans at least four countries and an unknown number of players. It is not over. He finds this invigorating.</p>
+        <span class="event-year-badge">2024–Present — Unknown</span>
+        <div class="event-detail">
+          <p>Each move in the game corresponds to a real-world event that only becomes apparent six to eight months after the fact. Analysts who mapped the first seven moves have gone very quiet. The board currently shows a middle-game position analysts describe as "impossible to predict and terrifying to behold."</p>
+        </div>
+      </div>
+    </div>
+    <div class="event-node"><div class="event-dot" style="border-color:#7eb8f7; box-shadow: 0 0 16px rgba(126,184,247,0.4);"></div></div>
+    <div class="event-spacer"></div>
+  </div>
+
+</div>
+
+<!-- CLASSIFIED BANNER -->
+<div class="classified-banner">
+  <p>— Further entries sealed by executive order —</p>
+</div>
+
+<!-- STATS -->
+<div class="stats-ticker" id="statsTicker">
+  <div class="ticker-item">
+    <div class="ticker-val" id="t1">0</div>
+    <div class="ticker-label">Years in operation</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-val" id="t2">0</div>
+    <div class="ticker-label">Known operations</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-val" id="t3">0</div>
+    <div class="ticker-label">Countries visited</div>
+  </div>
+  <div class="ticker-item">
+    <div class="ticker-val" id="t4">0</div>
+    <div class="ticker-label">Times outsmarted</div>
+  </div>
+</div>
+
+<footer>© 2026 Brian Bors Fanpage</footer>
+
+<script>
+  // ── SCROLL PROGRESS BAR ──
+  const progress = document.getElementById('progress');
+  const spineFill = document.getElementById('spineFill');
+  const timeline = document.getElementById('timeline');
+
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = (scrollTop / docHeight) * 100;
+    progress.style.width = pct + '%';
+
+    // spine fill
+    const tRect = timeline.getBoundingClientRect();
+    const tTop = timeline.offsetTop;
+    const tHeight = timeline.offsetHeight;
+    const fillPct = Math.max(0, Math.min(100, ((scrollTop - tTop + window.innerHeight * 0.5) / tHeight) * 100));
+    spineFill.style.height = fillPct + '%';
+  }
+
+  // ── SCROLL REVEALS ──
+  const revealEls = document.querySelectorAll('.event, .year-marker, .stats-ticker');
+
+  function check() {
+    const trigger = window.innerHeight * 0.88;
+    revealEls.forEach(el => {
+      if (el.getBoundingClientRect().top < trigger) {
+        el.classList.add('active');
+      }
+    });
+    updateProgress();
+    updateSidebarDots();
+  }
+
+  // ── SIDEBAR DOTS ──
+  const yearMarkers = document.querySelectorAll('.year-marker');
+  const sidebar = document.getElementById('yearSidebar');
+
+  yearMarkers.forEach(marker => {
+    const dot = document.createElement('div');
+    dot.className = 'year-dot';
+    dot.dataset.target = marker.id;
+    const label = document.createElement('span');
+    label.className = 'year-dot-label';
+    label.textContent = marker.dataset.year;
+    dot.appendChild(label);
+    dot.addEventListener('click', () => {
+      document.getElementById(marker.id).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    sidebar.appendChild(dot);
+  });
+
+  function updateSidebarDots() {
+    const dots = sidebar.querySelectorAll('.year-dot');
+    yearMarkers.forEach((marker, i) => {
+      const rect = marker.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.6 && rect.bottom > 0) {
+        dots.forEach(d => d.classList.remove('current'));
+        dots[i].classList.add('current');
+      }
+    });
+  }
+
+  // ── EXPAND DETAIL ──
+  function toggleDetail(card) {
+    const detail = card.querySelector('.event-detail');
+    detail.classList.toggle('open');
+  }
+
+  // ── COUNTER ANIMATION ──
+  function animateCounter(el, target, duration) {
+    let start = 0;
+    const increment = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= target) { el.textContent = target; clearInterval(timer); }
+      else el.textContent = Math.floor(start);
+    }, 16);
+  }
+
+  let statsAnimated = false;
+  const statsTicker = document.getElementById('statsTicker');
+
+  function checkStats() {
+    if (!statsAnimated && statsTicker.getBoundingClientRect().top < window.innerHeight * 0.88) {
+      statsAnimated = true;
+      statsTicker.classList.add('active');
+      animateCounter(document.getElementById('t1'), 30, 1800);
+      animateCounter(document.getElementById('t2'), 47, 1400);
+      animateCounter(document.getElementById('t3'), 17, 1600);
+      animateCounter(document.getElementById('t4'), 0, 1000);
+    }
+  }
+
+  window.addEventListener('scroll', () => { check(); checkStats(); });
+  window.addEventListener('resize', check);
+  check();
+</script>
+
+</body>
+</html>
